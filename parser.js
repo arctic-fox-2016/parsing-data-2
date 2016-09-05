@@ -1,34 +1,76 @@
 "use strict"
-
+var csv = require("fast-csv");
+const fs = require('fs');
+let database= []
+let stringnya=""
+let stringnyaYaml=""
 class Person {
   // Look at the above CSV file
   // What attributes should a Person object have?
+  constructor(person){
+  this.userId = person.userId
+  this.first_name = person.first_name
+  this.last_name = person.last_name
+  this.email = person.email
+  this.phone = person.phone
+  this.created_at = person.created_at
+  }
 }
-
 class PersonParser {
 
   constructor(file) {
-    this.file = file
-    this.people = []
+    this._file = file
+    this._people = null
   }
-
   get people() {
-    // If we've already parsed the CSV file, don't parse it again.
-    if (this.people)
-      return this.people
+    csv
+     .fromPath("people.csv")
+     .on("data", function(data){
+      database.push(new Person({userId: data[0], first_name: data[1], last_name: data[2], email:data[3], phone: data[4], created_at: data[5]}))
 
-    // We've never called people before, now parse the CSV file
-    // and return an Array of Person objects here.  Save the
-    // Array in the this.people instance variable.
+     })
+     .on("end", function(){
+       parser.addPerson(({userId: 201,first_name:"dudi",last_name:"didu",email:"dudi@yahoo.com",phone:4535345,created_at:new Date('2015-04-17T11:36:58-07:00')}))
+
+   for (let idx in database){
+     stringnyaYaml = stringnyaYaml + "- " +database[idx].userId + ":\n"+ "full name: "+database[idx].first_name + "\n"+ "last name: "+database[idx].last_name+ "\n"+ "email : "+database[idx].email + "\n"+ "phone : "+database[idx].phone + "\n"+ "createdDate : "
+     + new Date(database[idx].created_at) + "\n"
+   }
+      console.log(database)
+       //console.log(stringnyaYaml)
+       parser.yaml(stringnyaYaml)
+
+     });
+    if (this._people)
+      return this._people
   }
 
-  save() {}
+  addPerson(person)
+  {
+    database.push(new Person(person))
+  }
+  yaml(stringnyaYaml) {
+      fs.writeFile("message.YAML", stringnyaYaml)
+  }
 
-  save_as_yaml() {}
-
-  save_as_json() {}
+  save(stringnya){
+    //console.log(stringnya)
+    fs.writeFile('message.csv', stringnya);
+  }
 }
+let parser = new PersonParser('people.csv')
+parser.yaml(stringnyaYaml)
+parser.people
 
-var parser = new PersonParser('people.csv')
+//console.log(parser.save())
+//parser.addPerson({userId: 345242,first_name:"dudi",last_name:"didu",email:"dudi@yahoo.com",phone:4535345,created_at:423904290})
+// parser.save()
+// console.log(parser.people)
 
-console.log(`There are ${parser.people.size} people in the file '${parser.file}'.`)
+//console.log(`There are ${parser.people.size} people in the file '${parser.file}'.`)
+
+
+
+
+
+//console.log(`There are ${parser.people.size} people in the file '${parser.file}'.`)
